@@ -2,8 +2,25 @@ import math
 import matplotlib.pyplot as plt
 import sys
 import getopt
-import configparser
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
 
+class TableView(QTableWidget):
+    def __init__(self, data, *args):
+        QTableWidget.__init__(self, *args)
+        self.data = data
+        self.setData()
+        self.resizeColumnsToContents()
+        self.resizeRowsToContents()
+ 
+    def setData(self): 
+        horHeaders = []
+        for n, key in enumerate(sorted(self.data.keys())):
+            horHeaders.append(key)
+            for m, item in enumerate(self.data[key]):
+                newitem = QTableWidgetItem(item)
+                self.setItem(m, n, newitem)
+        self.setHorizontalHeaderLabels(horHeaders)
 
 def load():
     #Get power tuples
@@ -18,7 +35,7 @@ def load():
 
     #Load gear / final
     gear = []
-    final = 0.0 
+    final = 0.0
     with open("drivetrain.ini", "r") as file:
         line = file.readline()
         while line:
@@ -36,7 +53,8 @@ def load():
         line = file.readline()
         while line:
             if "RADIUS=" in line[0:8]:
-                radius = float("".join([s for s in line[7:] if s in "0123456789."]))
+                radius = float(
+                    "".join([s for s in line[7:] if s in "0123456789."]))
             line = file.readline()
 
     #Calculate ratios
@@ -77,8 +95,8 @@ def load():
                             #combine
                             total = (b1-b2)/(m2-m1)
                             #debug
-                            #print(f"found {x}")
-                            #print(f"calculated: {total}")
+                            print(f"{i} found {x}")
+                            print(f"calculated: {total}")
                             speeds.append(total)
     return (power, gear, final, radius, table, ratios, speeds)
 
@@ -107,7 +125,7 @@ def down(speeds, ratios):
 
 def plot(table):
     for g in table:
-        plt.plot(*zip(*g))
+        plt.scatter(*zip(*g))
     plt.show()
 
 
@@ -130,12 +148,27 @@ def main(argv):
     (power, gear, final, radius, table, ratios, speeds) = load()
     uprpm = up(speeds, ratios)
     downrpm = [0] + down(speeds, ratios)
+    gui = "Gear | Kph    | Down    | Up\n"
     print("Gear | Kph    | Down    | Up")
+    data = { "Gear":[], "Kph":[], "Down":[], "Up":[]}
     for i, speed in enumerate(speeds):
+        data["Gear"].append(str(i+1))
+        data["Kph"].append(str(round(speed,2)))
+        data["Down"].append(str(int(round(downrpm[i], -2))))
+        data["Up"].append(str(int(round(uprpm[i], -2))))
+        gui += f"{i+1}    | {round(speed,2)} |    {int(round(downrpm[i], -2))} | {int(round(uprpm[i], -2))}\n"
         print(
             f"{i+1}    | {round(speed,2)} |    {int(round(downrpm[i], -2))} | {int(round(uprpm[i], -2))}")
     print("Inputs used: (use this to verify the load)")
     print(f"Gears: {gear}\nFinal: {final}\nRadius: {radius}")
+    app = QApplication([])
+    label = QLabel(gui)
+    label.setFont(QFont('Arial', 20))
+    #label.show()
+    print(data["Gear"])
+    t = TableView(data,len(data["Gear"]),4)
+    t.show()
+    app.exec()
     if plotb:
         plot(table)
 
