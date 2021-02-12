@@ -2,6 +2,7 @@ import math
 import matplotlib.pyplot as plt
 import sys
 import getopt
+import configparser
 
 
 def load():
@@ -15,16 +16,28 @@ def load():
             power.append((int(s[0]), int(s[1])))
             line = file.readline()
 
-    #Load gear
-    gear = [
-        2.5, 1.875, 1.529, 1.2777, 1.105, 1
-    ]
-
-    #Load final
-    final = 3.6
-
+    #Load gear / final
+    gear = []
+    final = 0.0 
+    with open("drivetrain.ini", "r") as file:
+        line = file.readline()
+        while line:
+            if "GEAR_" in line and "GEAR_R" not in line:
+                gear.append(
+                    float("".join([s for s in line[7:] if s in "0123456789."])))
+            if "FINAL" in line:
+                final = float(
+                    "".join([s for s in line[6:] if s in "0123456789."]))
+            line = file.readline()
+    print(final)
     #Load radius
-    radius = 0.32
+    radius = 0.0
+    with open("tyres.ini", "r") as file:
+        line = file.readline()
+        while line:
+            if "RADIUS=" in line[0:8]:
+                radius = float("".join([s for s in line[7:] if s in "0123456789."]))
+            line = file.readline()
 
     #Calculate ratios
     ratios = []
@@ -70,6 +83,19 @@ def load():
     return (power, gear, final, radius, table, ratios, speeds)
 
 
+def up(speeds, ratios):
+    res = []
+    for i, x in enumerate(speeds):
+        res.append(x/ratios[i]*1000)
+    return res
+
+
+def down(speeds, ratios):
+    res = []
+    for i in range(1, len(speeds)+1):
+        res.append(speeds[i-1]/ratios[i]*1000)
+    return res
+
 #debug
 #print(power)
 #print(ratios)
@@ -77,6 +103,8 @@ def load():
 #print(speeds)
 
 #Plotting
+
+
 def plot(table):
     for g in table:
         plt.plot(*zip(*g))
@@ -84,12 +112,33 @@ def plot(table):
 
 
 def main(argv):
+    plotb = False
+    try:
+        opts, args = getopt.getopt(argv, "hp")
+    except getopt.GetoptError:
+        print('Wrong Input')
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            #help
+            print(
+                "Assetto Corsa Gear Change Calculator:\n  Args\n    -p  Will plot the data\n    -h  Shows this")
+            sys.exit()
+        elif opt in ("-p", "--plot"):
+            plotb = True
+
     (power, gear, final, radius, table, ratios, speeds) = load()
+    uprpm = up(speeds, ratios)
+    downrpm = [0] + down(speeds, ratios)
+    print("Gear | Kph    | Down    | Up")
     for i, speed in enumerate(speeds):
-        print(f"Gear {i}: {speed}")
+        print(
+            f"{i+1}    | {round(speed,2)} |    {int(round(downrpm[i], -2))} | {int(round(uprpm[i], -2))}")
     print("Inputs used: (use this to verify the load)")
     print(f"Gears: {gear}\nFinal: {final}\nRadius: {radius}")
-    plot(table)
+    if plotb:
+        plot(table)
 
 
-main(True)
+if __name__ == "__main__":
+   main(sys.argv[1:])
