@@ -2,6 +2,7 @@ import math
 import matplotlib.pyplot as plt
 
 
+#Get power tuples
 power = []
 with open("power.lut", "r") as file:
     line = file.readline()
@@ -11,15 +12,23 @@ with open("power.lut", "r") as file:
         power.append((int(s[0]), int(s[1])))
         line = file.readline()
 
+#Load gear
 gear = [
     2.5, 1.875, 1.529, 1.2777, 1.105, 1
 ]
+
+#Load final
 final = 3.6
+
+#Load radius
 radius = 0.32
+
+#Calculate ratios
 ratios = []
 for i in gear:
     ratios.append((((1000/60)/i)/final)*radius*2*math.pi*3.6)
 
+#Make the matrix(table)
 table = []
 for ratio in ratios:
     val = []
@@ -57,11 +66,13 @@ for i, g in enumerate(table):
                         speeds.append(total)
 
 
-
+#Debug
 print(power)
 print(ratios)
 print(table)
 print(speeds)
 
-#plt.plot(*zip(*table[0]))
-#plt.show()
+#Plotting
+for g in table:
+    plt.plot(*zip(*g))
+plt.show()
