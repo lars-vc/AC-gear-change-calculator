@@ -11,7 +11,6 @@ if missing:
     msstr = " ".join(missing)
     python = sys.executable
     os.system(f"{python} -m pip install {msstr}")
-    #subprocess.check_call([python, '-m', 'pip', 'install', *missing])
 
 import math
 import matplotlib.pyplot as plt
@@ -93,7 +92,7 @@ def load():
                 for count, x in enumerate(nextgear):
                     if round(tup[0], 2) <= x[0] <= round(nexttup[0], 2):
                         # check torque
-                        if round(tup[1], 2) > round(nexttup[1], 2) and round(nexttup[1], 2) <= round(x[1], 2) <= round(tup[1], 2):
+                        if (round(tup[1], 2) > round(nexttup[1], 2) and round(nexttup[1], 2) <= round(x[1], 2) <= round(tup[1], 2)) or (round(nexttup[1], 2) > round(tup[1], 2) and round(tup[1], 2) <= round(x[1], 2) <= round(nexttup[1], 2)):
                             prev = nextgear[count-1]
                             #next gear points
                             x1, y1 = x
