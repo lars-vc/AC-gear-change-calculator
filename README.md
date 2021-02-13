@@ -6,4 +6,9 @@ Go to the [releases](https://github.com/lars-vc/AC-gear-change-calculator/releas
 
 ## Usage
 
-You can run the file by putting it in the directory next to the ini files, then you can type ```python racecalc.py``` You need to have python installed to run this.
+You can run the file by first putting it in the directory next to the ini files, then you can type
+```
+python racecalc.py
+```
+in your cmd/powershell/any-terminal-you-want  
+You need to have python installed to run this.
