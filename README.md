@@ -2,7 +2,7 @@
 
 ## Install
 
-Go to the releases page and download the racecalc.py file.
+Go to the [releases](https://github.com/lars-vc/AC-gear-change-calculator/releases) page and download the racecalc.py file.
 
 ## Usage
 
