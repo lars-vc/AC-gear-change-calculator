@@ -1,14 +1,17 @@
 import sys
 import subprocess
 import pkg_resources
+import os
 
 required = {'matplotlib', 'PyQt5'}
 installed = {pkg.key for pkg in pkg_resources.working_set}
 missing = required - installed
 
 if missing:
+    msstr = " ".join(missing)
     python = sys.executable
-    subprocess.check_call([python, '-m', 'pip', 'install', *missing], stdout=subprocess.DEVNULL)
+    os.system(f"{python} -m pip install {msstr}")
+    #subprocess.check_call([python, '-m', 'pip', 'install', *missing])
 
 import math
 import matplotlib.pyplot as plt
