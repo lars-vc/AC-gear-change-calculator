@@ -1,9 +1,21 @@
+import sys
+import subprocess
+import pkg_resources
+
+required = {'matplotlib', 'PyQt5'}
+installed = {pkg.key for pkg in pkg_resources.working_set}
+missing = required - installed
+
+if missing:
+    python = sys.executable
+    subprocess.check_call([python, '-m', 'pip', 'install', *missing], stdout=subprocess.DEVNULL)
+
 import math
 import matplotlib.pyplot as plt
-import sys
 import getopt
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
+
 
 class TableView(QTableWidget):
     def __init__(self, data, *args):
@@ -12,8 +24,8 @@ class TableView(QTableWidget):
         self.setData()
         self.resizeColumnsToContents()
         self.resizeRowsToContents()
- 
-    def setData(self): 
+
+    def setData(self):
         horHeaders = []
         for n, key in enumerate(sorted(self.data.keys())):
             horHeaders.append(key)
@@ -21,6 +33,7 @@ class TableView(QTableWidget):
                 newitem = QTableWidgetItem(item)
                 self.setItem(m, n, newitem)
         self.setHorizontalHeaderLabels(horHeaders)
+
 
 def load():
     #Get power tuples
@@ -46,7 +59,6 @@ def load():
                 final = float(
                     "".join([s for s in line[6:] if s in "0123456789."]))
             line = file.readline()
-    print(final)
     #Load radius
     radius = 0.0
     with open("tyres.ini", "r") as file:
@@ -95,8 +107,8 @@ def load():
                             #combine
                             total = (b1-b2)/(m2-m1)
                             #debug
-                            print(f"{i} found {x}")
-                            print(f"calculated: {total}")
+                            #print(f"{i} found {x}")
+                            #print(f"calculated: {total}")
                             speeds.append(total)
     return (power, gear, final, radius, table, ratios, speeds)
 
@@ -125,7 +137,7 @@ def down(speeds, ratios):
 
 def plot(table):
     for g in table:
-        plt.scatter(*zip(*g))
+        plt.plot(*zip(*g))
     plt.show()
 
 
@@ -148,30 +160,36 @@ def main(argv):
     (power, gear, final, radius, table, ratios, speeds) = load()
     uprpm = up(speeds, ratios)
     downrpm = [0] + down(speeds, ratios)
-    gui = "Gear | Kph    | Down    | Up\n"
-    print("Gear | Kph    | Down    | Up")
-    data = { "Gear":[], "Kph":[], "Down":[], "Up":[]}
-    for i, speed in enumerate(speeds):
-        data["Gear"].append(str(i+1))
-        data["Kph"].append(str(round(speed,2)))
-        data["Down"].append(str(int(round(downrpm[i], -2))))
-        data["Up"].append(str(int(round(uprpm[i], -2))))
-        gui += f"{i+1}    | {round(speed,2)} |    {int(round(downrpm[i], -2))} | {int(round(uprpm[i], -2))}\n"
-        print(
-            f"{i+1}    | {round(speed,2)} |    {int(round(downrpm[i], -2))} | {int(round(uprpm[i], -2))}")
-    print("Inputs used: (use this to verify the load)")
-    print(f"Gears: {gear}\nFinal: {final}\nRadius: {radius}")
-    app = QApplication([])
-    label = QLabel(gui)
-    label.setFont(QFont('Arial', 20))
-    #label.show()
-    print(data["Gear"])
-    t = TableView(data,len(data["Gear"]),4)
-    t.show()
-    app.exec()
-    if plotb:
-        plot(table)
+    #debug
+    #print("Gear | Kph    | Down    | Up")
+    data = {"a.Gear": [], "b.Kph": [], "c.Down": [], "d.Up": []}
 
+    for i, speed in enumerate(speeds):
+        data["a.Gear"].append(str(i+1))
+        data["b.Kph"].append(str(round(speed, 2)))
+        data["c.Down"].append(str(int(round(downrpm[i], -2))))
+        data["d.Up"].append(str(int(round(uprpm[i], -2))))
+
+    #   debug    
+    #   print(
+    #       f"{i+1}    | {round(speed,2)} |    {int(round(downrpm[i], -2))} | {int(round(uprpm[i], -2))}")
+
+    #print("Inputs used: (use this to verify the load)")
+    #print(f"Gears: {gear}\nFinal: {final}\nRadius: {radius}")
+    app = QApplication([])
+    t = TableView(data, len(data["a.Gear"]), 4)
+    win = QWidget()
+    button = QPushButton("Plot")
+    button.clicked.connect(lambda: plot(table))
+    vbox = QVBoxLayout()
+    vbox.addWidget(t)
+    vbox.addStretch()
+    vbox.addWidget(button)
+    win.setLayout(vbox)
+
+    win.setWindowTitle("Gear Change Calculator")
+    win.show()
+    app.exec()
 
 if __name__ == "__main__":
    main(sys.argv[1:])
