@@ -44,9 +44,9 @@ def load():
     with open("power.lut", "r") as file:
         line = file.readline()
         while line:
-            s = line.split("|")
-            s = s[0:len(s)]
-            power.append((int(s[0]), int(s[1])))
+            if line != "\n" and line != "":
+                s = line.strip().split("|")
+                power.append((int(s[0]), int(s[1])))
             line = file.readline()
 
     #Load gear / final
