@@ -84,9 +84,10 @@ def load():
             val.append((p[0]*ratio/1000, p[1]/ratio))
         table.append(val)
     speeds = []
+    b =False
     for i, g in enumerate(table):
         for j, tup in enumerate(g):
-            if j+1 < len(g) and i+1 < len(table):
+            if j+1 < len(g) and i+1 < len(table) and tup[0] != 0:
                 nexttup = g[j+1]
                 nextgear = table[i+1]
                 for count, x in enumerate(nextgear):
@@ -112,6 +113,9 @@ def load():
                             #print(f"{i} found {x}")
                             #print(f"calculated: {total}")
                             speeds.append(total)
+                            b = True
+                            break
+
     return (power, gear, final, radius, table, ratios, speeds)
 
 
